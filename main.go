@@ -5,47 +5,11 @@ import (
 	"os"
 )
 
-type Stack[Type any] struct {
-	arr []Type
-}
-
-func (this *Stack[Type]) Push(ele Type) {
-	this.arr = append(this.arr, ele)
-	
-}
-
-func (this *Stack[Type]) Pop() Type {
-	if this.IsEmpty() {
-		panic("stack is empty")
-	}
-	res := this.Peek()
-	this.arr = this.arr[:len(this.arr) - 1]
-	return res
-}
-
-func (this *Stack[Type]) Peek() Type {
-	res := this.arr[len(this.arr) - 1]
-	return res
-}
-
-func (this *Stack[Type]) Size() int {
-	return len(this.arr)
-}
-
-func (this *Stack[Type]) IsEmpty() bool {
-	return len(this.arr) == 0
-}
-
-func CreateStack[Type any]() Stack[Type] {
-	return Stack[Type]{
-		arr: make([]Type, 0, 15),
-	}
-}
 
 func main() {
 	args := os.Args[1:]
 	if len(args) != 1 {
-		fmt.Println("go run . [brainfudge string]")
+		fmt.Println("go run . [brainfudge source]")
 		os.Exit(1)
 	}
 	
@@ -96,24 +60,25 @@ func runInterpreter(input string) {
 
 func initalizeJumpMap(input string) map[int]int {
 	res := make(map[int]int)
-	s := CreateStack[int]()
+	s := make([]int, 0, 15)
 	for i, token := range input {
 		switch token {
 			case '[':
-				s.Push(i)
+				s = append(s, i)
 			case ']':
-				if s.IsEmpty() || input[s.Peek()] == ']' {
+				if len(s) == 0 || input[s[len(s)-1]] == ']' {
 					fmt.Println("Invalid Syntax")
 					os.Exit(2)
 				}
-				LeftBracIdx := s.Pop()
+				LeftBracIdx := s[len(s)-1]
+				s = s[:len(s) - 1]
 				rightBracIdx := i
 				res[LeftBracIdx] = rightBracIdx + 1
 				res[rightBracIdx] = LeftBracIdx + 1
 		}
 	}
 	
-	if !s.IsEmpty() {
+	if len(s) != 0{
 		fmt.Println("Invalid Syntax")
 		os.Exit(2)
 	}
